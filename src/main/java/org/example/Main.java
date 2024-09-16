@@ -16,19 +16,37 @@ import java.util.stream.IntStream;
 
 public class Main {
   public static void main(String[] args) throws Exception {
+    arrowFlightPath();
+    // legacyJdbcPath();
+  }
 
+  private static void arrowFlightPath() throws Exception {
+    String connection = "jdbc:arrow-flight-sql://localhost:32010/?useEncryption=false";
+    String query = "select * from Samples.\"samples.dremio.com\".\"zips.json\" limit 5";
+    runQuery(connection, query);
+  }
+
+  private static void legacyJdbcPath() throws Exception {
+    String connection = "jdbc:dremio:direct=localhost:31010";
+    String query = "select * from Samples.\"samples.dremio.com\".\"zips.json\" limit 5";
+    runQuery(connection, query);
+  }
+
+  private static void runQuery(String connection, String query, String... params) throws Exception {
     Properties props = new Properties();
     props.setProperty("user", "dremio");
     props.setProperty("password", "dremio123");
 
-    String connectionStr = "jdbc:arrow-flight-sql://localhost:32010/?useEncryption=false";
-    String query = "select * from Samples.\"samples.dremio.com\".\"zips.json\" limit 5";
+    try (Connection con = DriverManager.getConnection(connection, props);
+        PreparedStatement ps = con.prepareStatement(query)) {
 
-    try (Connection con = DriverManager.getConnection(connectionStr, props);
-        PreparedStatement ps = con.prepareStatement(query);
-        ResultSet rs = ps.executeQuery()) {
+      for (int i = 0; i < params.length; i++) {
+        ps.setString(i + 1, params[i]);
+      }
 
-      System.out.println(getResultsAsJson(rs));
+      try (ResultSet rs = ps.executeQuery()) {
+        System.out.println(getResultsAsJson(rs));
+      }
     }
   }
 
