@@ -22,14 +22,14 @@ public class Main {
 
   private static void arrowFlightPath() throws Exception {
     String connection = "jdbc:arrow-flight-sql://localhost:32010/?useEncryption=false";
-    String query = "select * from Samples.\"samples.dremio.com\".\"zips.json\" limit 5";
-    runQuery(connection, query);
+    String query = "select * from Samples.\"samples.dremio.com\".\"zips.json\" where state = ? limit 5";
+    runQuery(connection, query, "MA");
   }
 
   private static void legacyJdbcPath() throws Exception {
     String connection = "jdbc:dremio:direct=localhost:31010";
-    String query = "select * from Samples.\"samples.dremio.com\".\"zips.json\" limit 5";
-    runQuery(connection, query);
+    String query = "select * from Samples.\"samples.dremio.com\".\"zips.json\" where state = ? limit 5";
+    runQuery(connection, query, "MA");
   }
 
   private static void runQuery(String connection, String query, String... params) throws Exception {
